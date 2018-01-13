@@ -32,7 +32,7 @@ def topn_features(clf, n):
     return top_words_dict, top_chars_dict
 
 
-def confusion_matrix(clf, X, y):
+def confusion_matrix(clf, X, y, do_fit=True):
     X = np.array(X)
     y = np.array(y)
 
@@ -43,7 +43,8 @@ def confusion_matrix(clf, X, y):
     train_idx, test_idx, _, _ = train_test_split(idx,
                                                  y[:, 0],
                                                  stratify=y[:, 0])
-    clf.fit(X[train_idx], y[train_idx])
+    if do_fit:
+        clf.fit(X[train_idx], y[train_idx])
 
     prediction = clf.predict(X[test_idx])[:, 0]
     test = y[test_idx, 0]
