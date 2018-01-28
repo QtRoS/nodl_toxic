@@ -1,6 +1,7 @@
 import argparse
 from copy import deepcopy
 import pandas as pd
+import numpy as np
 import json
 from itertools import chain
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -30,8 +31,10 @@ def get_vocabulary_word_weights(vocabulary_words, texts):
     tfidf_values = tfidf.fit_transform(texts)
     features = set(tfidf.get_feature_names()) & vocabulary_words
     weights = {}
+    feature_name_dict = {k: v for v, k in enumerate(tfidf.get_feature_names())}
+    tfidf_values_col_means = np.array(tfidf_values.mean(axis=0)).ravel()
     for word in tqdm(features):
-        weights[word] = tfidf_values[:, tfidf.get_feature_names().index(word)].mean()
+        weights[word] = tfidf_values_col_means[feature_name_dict[word]]  #tfidf_values[:, feature_name_dict[word]].mean()
     return weights
 
 
