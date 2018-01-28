@@ -5,7 +5,7 @@ import numpy as np
 def tokenize(text, lowercase=True):
     if lowercase:
         text = text.lower()
-    delimeter = "([?\\/.,`~!@#4%^&*()-+\[\]{}<>'\"]*[ \s\n\t\r]+)"
+    delimeter = "([\\/.,`~@#4%^&*()-+\[\]{}<>'\"]*[ \s\n\t\r]+)"
     tokens = re.split(delimeter, text + " ")
     stripped_tokens = map(str.strip, tokens)
     noempty_tokens = filter(bool, stripped_tokens)
