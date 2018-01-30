@@ -141,8 +141,7 @@ if __name__ == '__main__':
     y_train = np.array(dftrain[targets])
 
     print("Fitting models")
-    fnames = []
-    for i in range(FOLD_COUNT):
-        fnames.append(os.path.join(args.modeldir, str(i) + ".h5"))
+    os.makedirs(args.modeldir, exist_ok=True)
+    fnames = [os.path.join(args.modeldir, str(i) + ".h5") for i in range(FOLD_COUNT)]
     fold_index = int(args.fold) - 1
     fit_models(X_train, y_train, vectors_cut, fnames[fold_index], fold_index)
