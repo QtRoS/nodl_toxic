@@ -9,6 +9,7 @@ from keras.models import Sequential
 from keras.optimizers import RMSprop
 from sklearn.metrics import log_loss
 from utils import get_wordset
+from keras import backend as K
 import os
 import gc
 
@@ -28,6 +29,34 @@ def get_args():
     parser.add_argument("test_prediction")
     return parser.parse_args()
 
+
+def custom_loss(y_true, y_pred):
+    eps = 1e-10
+    toxic_pos_weight         = 1.0
+    toxic_neg_weight         = 1.0
+    severe_toxic_pos_weight  = 1.5
+    severe_toxic_neg_weight  = 1.0
+    obscene_pos_weight       = 1.0
+    obscene_neg_weight       = 1.0
+    threat_pos_weight        = 1.5
+    threat_neg_weight        = 1.0
+    insult_pos_weight        = 1.0
+    insult_neg_weight        = 1.0
+    identity_hate_pos_weight = 1.5
+    identity_hate_neg_weight = 1.0
+    toxic         =         toxic_pos_weight *      y_true[:, 0]  * K.log(    y_pred[:, 0] + eps) + \
+                            toxic_neg_weight * (1 - y_true[:, 0]) * K.log(1 - y_pred[:, 0] + eps)
+    severe_toxic  =  severe_toxic_pos_weight *      y_true[:, 1]  * K.log(    y_pred[:, 1] + eps) + \
+                     severe_toxic_neg_weight * (1 - y_true[:, 1]) * K.log(1 - y_pred[:, 1] + eps)
+    obscene       =       obscene_pos_weight *      y_true[:, 2]  * K.log(    y_pred[:, 2] + eps) + \
+                          obscene_neg_weight * (1 - y_true[:, 2]) * K.log(1 - y_pred[:, 2] + eps)
+    threat        =        threat_pos_weight *      y_true[:, 3]  * K.log(    y_pred[:, 3] + eps) + \
+                           threat_neg_weight * (1 - y_true[:, 3]) * K.log(1 - y_pred[:, 3] + eps)
+    insult        =        insult_pos_weight *      y_true[:, 4]  * K.log(    y_pred[:, 4] + eps) + \
+                           insult_neg_weight * (1 - y_true[:, 4]) * K.log(1 - y_pred[:, 4] + eps)
+    identity_hate = identity_hate_pos_weight *      y_true[:, 5]  * K.log(    y_pred[:, 5] + eps) + \
+                    identity_hate_neg_weight * (1 - y_true[:, 5]) * K.log(1 - y_pred[:, 5] + eps)
+    return - (toxic + severe_toxic + obscene + threat + insult + identity_hate) / 6.0
 
 
 def fit_models(X, y, embedding_vectors, fname, fold):
@@ -49,7 +78,7 @@ def fit_models(X, y, embedding_vectors, fname, fold):
             Dense(y.shape[1], activation='sigmoid')
         ])
         model.compile(optimizer=RMSprop(clipvalue=1, clipnorm=1),
-                      loss='binary_crossentropy',
+                      loss=custom_loss,  # 'binary_crossentropy',
                       metrics=['accuracy'])
         return model
 
